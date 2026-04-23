@@ -1,0 +1,874 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Handwerk Report</title>
+  <style>
+    :root {
+      --bg: #f5f7fb;
+      --card: #ffffff;
+      --text: #111827;
+      --muted: #6b7280;
+      --border: #e5e7eb;
+      --primary: #111827;
+      --primary-hover: #1f2937;
+      --success: #166534;
+      --success-bg: #dcfce7;
+      --error: #991b1b;
+      --error-bg: #fee2e2;
+      --shadow: 0 10px 30px rgba(17, 24, 39, 0.06);
+      --radius: 18px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+    }
+
+    .container {
+      max-width: 1150px;
+      margin: 0 auto;
+      padding: 24px 16px 48px;
+    }
+
+    .hero {
+      margin-bottom: 24px;
+    }
+
+    .hero h1 {
+      margin: 0 0 8px;
+      font-size: 32px;
+    }
+
+    .hero p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 16px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1.1fr 1fr;
+      gap: 20px;
+      align-items: start;
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+      box-shadow: var(--shadow);
+      margin-bottom: 20px;
+    }
+
+    .card h2, .card h3 {
+      margin-top: 0;
+      margin-bottom: 14px;
+    }
+
+    .row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .field-group {
+      margin-bottom: 14px;
+    }
+
+    label {
+      display: block;
+      font-size: 14px;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+
+    input, select, textarea, button {
+      width: 100%;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      padding: 12px 14px;
+      font-size: 14px;
+    }
+
+    input, select, textarea {
+      background: white;
+    }
+
+    textarea {
+      min-height: 96px;
+      resize: vertical;
+    }
+
+    button {
+      background: var(--primary);
+      color: white;
+      border: none;
+      cursor: pointer;
+      font-weight: 700;
+      transition: 0.15s ease;
+    }
+
+    button:hover {
+      background: var(--primary-hover);
+    }
+
+    .secondary-btn {
+      background: #eef2ff;
+      color: #1e3a8a;
+    }
+
+    .secondary-btn:hover {
+      background: #dbeafe;
+    }
+
+    .danger-btn {
+      background: #7f1d1d;
+    }
+
+    .danger-btn:hover {
+      background: #991b1b;
+    }
+
+    .message {
+      margin-top: 12px;
+      border-radius: 12px;
+      padding: 12px 14px;
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    .success {
+      color: var(--success);
+      background: var(--success-bg);
+    }
+
+    .error {
+      color: var(--error);
+      background: var(--error-bg);
+    }
+
+    .hint {
+      color: var(--muted);
+      font-size: 13px;
+      margin-top: 6px;
+    }
+
+    .customer-list,
+    .report-list,
+    .material-list {
+      display: grid;
+      gap: 12px;
+      padding: 0;
+      list-style: none;
+      margin: 0;
+    }
+
+    .customer-item,
+    .report-item,
+    .material-item {
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 14px;
+      background: #fafafa;
+    }
+
+    .customer-item strong,
+    .report-item strong {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 15px;
+    }
+
+    .muted {
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .report-item {
+      cursor: pointer;
+      transition: 0.15s ease;
+    }
+
+    .report-item:hover {
+      transform: translateY(-1px);
+      border-color: #cbd5e1;
+      background: #f8fafc;
+    }
+
+    .result-box {
+      margin-top: 16px;
+      border: 1px solid var(--border);
+      background: #f9fafb;
+      border-radius: 14px;
+      padding: 16px;
+      white-space: pre-wrap;
+      min-height: 70px;
+      line-height: 1.6;
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .stat {
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 16px;
+      box-shadow: var(--shadow);
+    }
+
+    .stat-label {
+      color: var(--muted);
+      font-size: 13px;
+      margin-bottom: 8px;
+    }
+
+    .stat-value {
+      font-size: 24px;
+      font-weight: 800;
+    }
+
+    .material-actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    .material-actions button {
+      width: auto;
+      flex: 1;
+    }
+
+    @media (max-width: 900px) {
+      .grid {
+        grid-template-columns: 1fr;
+      }
+
+      .stats {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .row,
+      .stats {
+        grid-template-columns: 1fr;
+      }
+
+      .hero h1 {
+        font-size: 26px;
+      }
+
+      .material-actions {
+        flex-direction: column;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="hero">
+      <h1>Handwerk Report</h1>
+      <p>Arbeitsberichte, Kunden, Material und Kosten digital erfassen.</p>
+    </div>
+
+    <div class="stats">
+      <div class="stat">
+        <div class="stat-label">Kunden</div>
+        <div class="stat-value" id="customerCount">0</div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">Berichte</div>
+        <div class="stat-value" id="reportCount">0</div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">Letzter Gesamtpreis</div>
+        <div class="stat-value" id="lastTotal">0 €</div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">Letzter Kunde</div>
+        <div class="stat-value" id="lastCustomer">-</div>
+      </div>
+    </div>
+
+    <div class="grid">
+      <div>
+        <div class="card">
+          <h2>Kundenliste</h2>
+          <ul id="customerList" class="customer-list"></ul>
+        </div>
+
+        <div class="card">
+          <h2>Berichtshistorie</h2>
+          <button class="secondary-btn" onclick="loadReports()">Berichte aktualisieren</button>
+          <div class="hint">Klicke auf einen Bericht, um die Details zu sehen.</div>
+          <ul id="reportList" class="report-list" style="margin-top:14px;"></ul>
+        </div>
+
+        <div class="card">
+          <h2>Berichtsdetails</h2>
+          <div id="reportDetail" class="result-box">Noch kein Bericht ausgewählt.</div>
+        </div>
+      </div>
+
+      <div>
+        <div class="card">
+          <h2>Neuen Kunden anlegen</h2>
+
+          <div class="field-group">
+            <label for="name">Name</label>
+            <input id="name" placeholder="z. B. Familie Müller">
+          </div>
+
+          <div class="field-group">
+            <label for="street">Straße</label>
+            <input id="street" placeholder="z. B. Hauptstraße 12">
+          </div>
+
+          <div class="row">
+            <div class="field-group">
+              <label for="zip_code">PLZ</label>
+              <input id="zip_code" placeholder="72525">
+            </div>
+
+            <div class="field-group">
+              <label for="city">Ort</label>
+              <input id="city" placeholder="Münsingen">
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="field-group">
+              <label for="phone">Telefon</label>
+              <input id="phone" placeholder="01701234567">
+            </div>
+
+            <div class="field-group">
+              <label for="email">E-Mail</label>
+              <input id="email" placeholder="kunde@example.de">
+            </div>
+          </div>
+
+          <button onclick="addCustomer()">Kunde speichern</button>
+          <div id="customerMessage"></div>
+        </div>
+
+        <div class="card">
+          <h2>Arbeitsbericht erstellen</h2>
+
+          <div class="field-group">
+            <label for="customerSelect">Kunde auswählen</label>
+            <select id="customerSelect"></select>
+          </div>
+
+          <div class="row">
+            <div class="field-group">
+              <label for="work_date">Datum</label>
+              <input id="work_date" type="date">
+            </div>
+
+            <div class="field-group">
+              <label for="hourly_rate">Stundenlohn (€)</label>
+              <input id="hourly_rate" type="number" step="0.01" value="65">
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="field-group">
+              <label for="start_time">Startzeit</label>
+              <input id="start_time" type="time">
+            </div>
+
+            <div class="field-group">
+              <label for="end_time">Endzeit</label>
+              <input id="end_time" type="time">
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="field-group">
+              <label for="break_minutes">Pause (Minuten)</label>
+              <input id="break_minutes" type="number" min="0" step="1" value="0">
+              <div class="hint">Wird aktuell im Frontend von der Arbeitszeit abgezogen.</div>
+            </div>
+
+            <div class="field-group">
+              <label for="travel_cost">Fahrtkosten (€)</label>
+              <input id="travel_cost" type="number" step="0.01" value="0">
+            </div>
+          </div>
+
+          <div class="field-group">
+            <label for="description">Beschreibung</label>
+            <textarea id="description" placeholder="z. B. Wasserhahn ausgetauscht und Anschluss geprüft"></textarea>
+          </div>
+
+          <div class="field-group">
+            <label for="notes">Notizen</label>
+            <textarea id="notes" placeholder="Optionale Zusatzinfos"></textarea>
+          </div>
+
+          <h3>Material hinzufügen</h3>
+
+          <div class="row">
+            <div class="field-group">
+              <label for="material_name">Materialname</label>
+              <input id="material_name" placeholder="z. B. Wasserhahn">
+            </div>
+
+            <div class="field-group">
+              <label for="material_unit">Einheit</label>
+              <input id="material_unit" placeholder="z. B. Stück">
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="field-group">
+              <label for="material_quantity">Menge</label>
+              <input id="material_quantity" type="number" step="0.01" placeholder="1">
+            </div>
+
+            <div class="field-group">
+              <label for="material_price">Einzelpreis (€)</label>
+              <input id="material_price" type="number" step="0.01" placeholder="79">
+            </div>
+          </div>
+
+          <div class="material-actions">
+            <button type="button" class="secondary-btn" onclick="addMaterial()">Material hinzufügen</button>
+            <button type="button" class="danger-btn" onclick="clearMaterials()">Material leeren</button>
+          </div>
+
+          <div class="hint">Du kannst mehrere Materialpositionen sammeln, bevor du den Bericht speicherst.</div>
+
+          <ul id="materialList" class="material-list" style="margin-top:14px;"></ul>
+
+          <button onclick="createReport()" style="margin-top:16px;">Bericht erstellen</button>
+          <div id="reportMessage"></div>
+          <div id="result" class="result-box">Noch kein Bericht erstellt.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const API_BASE = "http://127.0.0.1:8000";
+    let materials = [];
+
+    function showMessage(elementId, message, type = "success") {
+      const el = document.getElementById(elementId);
+      el.className = `message ${type}`;
+      el.textContent = message;
+    }
+
+    function clearMessage(elementId) {
+      const el = document.getElementById(elementId);
+      el.className = "";
+      el.textContent = "";
+    }
+
+    function formatEuro(value) {
+      return `${Number(value).toFixed(2)} €`;
+    }
+
+    async function loadCustomers() {
+      try {
+        const res = await fetch(`${API_BASE}/customers`);
+        const data = await res.json();
+
+        const list = document.getElementById("customerList");
+        const select = document.getElementById("customerSelect");
+
+        list.innerHTML = "";
+        select.innerHTML = "";
+
+        if (!Array.isArray(data) || data.length === 0) {
+          list.innerHTML = "<li class='customer-item'><strong>Noch keine Kunden vorhanden.</strong></li>";
+          const option = document.createElement("option");
+          option.value = "";
+          option.text = "Keine Kunden vorhanden";
+          select.appendChild(option);
+          document.getElementById("customerCount").textContent = "0";
+          document.getElementById("lastCustomer").textContent = "-";
+          return;
+        }
+
+        data.forEach(customer => {
+          const li = document.createElement("li");
+          li.className = "customer-item";
+          li.innerHTML = `
+            <strong>${customer.name}</strong>
+            <div class="muted">${customer.street}, ${customer.zip_code} ${customer.city}</div>
+            <div class="muted">${customer.phone}${customer.email ? " · " + customer.email : ""}</div>
+          `;
+          list.appendChild(li);
+
+          const option = document.createElement("option");
+          option.value = customer.id;
+          option.text = `${customer.name} (${customer.city})`;
+          select.appendChild(option);
+        });
+
+        document.getElementById("customerCount").textContent = data.length;
+        document.getElementById("lastCustomer").textContent = data[0]?.name || "-";
+
+      } catch (err) {
+        console.error("Fehler beim Laden der Kunden:", err);
+        showMessage("customerMessage", "Kunden konnten nicht geladen werden.", "error");
+      }
+    }
+
+    async function addCustomer() {
+      clearMessage("customerMessage");
+
+      const payload = {
+        name: document.getElementById("name").value.trim(),
+        street: document.getElementById("street").value.trim(),
+        zip_code: document.getElementById("zip_code").value.trim(),
+        city: document.getElementById("city").value.trim(),
+        phone: document.getElementById("phone").value.trim(),
+        email: document.getElementById("email").value.trim() || null
+      };
+
+      if (!payload.name || !payload.street || !payload.zip_code || !payload.city || !payload.phone) {
+        showMessage("customerMessage", "Bitte alle Pflichtfelder für den Kunden ausfüllen.", "error");
+        return;
+      }
+
+      try {
+        const res = await fetch(`${API_BASE}/customers`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify(payload)
+        });
+
+        if (!res.ok) {
+          const errorData = await res.json();
+          console.error("Backend-Fehler:", errorData);
+          showMessage("customerMessage", "Fehler beim Speichern des Kunden.", "error");
+          return;
+        }
+
+        showMessage("customerMessage", "Kunde erfolgreich gespeichert.", "success");
+
+        document.getElementById("name").value = "";
+        document.getElementById("street").value = "";
+        document.getElementById("zip_code").value = "";
+        document.getElementById("city").value = "";
+        document.getElementById("phone").value = "";
+        document.getElementById("email").value = "";
+
+        await loadCustomers();
+
+      } catch (err) {
+        console.error("Fehler beim Speichern:", err);
+        showMessage("customerMessage", "Fehler beim Speichern des Kunden.", "error");
+      }
+    }
+
+    function renderMaterials() {
+      const list = document.getElementById("materialList");
+      list.innerHTML = "";
+
+      if (materials.length === 0) {
+        list.innerHTML = "<li class='material-item'><strong>Noch kein Material hinzugefügt.</strong></li>";
+        return;
+      }
+
+      materials.forEach((item, index) => {
+        const li = document.createElement("li");
+        li.className = "material-item";
+        li.innerHTML = `
+          <strong>${item.name}</strong>
+          <div class="muted">${item.quantity} ${item.unit} x ${item.unit_price} € = ${(item.quantity * item.unit_price).toFixed(2)} €</div>
+          <button class="danger-btn" style="margin-top:10px;" onclick="removeMaterial(${index})">Entfernen</button>
+        `;
+        list.appendChild(li);
+      });
+    }
+
+    function addMaterial() {
+      clearMessage("reportMessage");
+
+      const materialName = document.getElementById("material_name").value.trim();
+      const materialQuantity = document.getElementById("material_quantity").value;
+      const materialUnit = document.getElementById("material_unit").value.trim();
+      const materialPrice = document.getElementById("material_price").value;
+
+      if (!materialName || !materialQuantity || !materialUnit || !materialPrice) {
+        showMessage("reportMessage", "Bitte alle Materialfelder vollständig ausfüllen.", "error");
+        return;
+      }
+
+      materials.push({
+        name: materialName,
+        quantity: parseFloat(materialQuantity),
+        unit: materialUnit,
+        unit_price: parseFloat(materialPrice)
+      });
+
+      document.getElementById("material_name").value = "";
+      document.getElementById("material_quantity").value = "";
+      document.getElementById("material_unit").value = "";
+      document.getElementById("material_price").value = "";
+
+      renderMaterials();
+      showMessage("reportMessage", "Material hinzugefügt.", "success");
+    }
+
+    function removeMaterial(index) {
+      materials.splice(index, 1);
+      renderMaterials();
+    }
+
+    function clearMaterials() {
+      materials = [];
+      renderMaterials();
+    }
+
+    function calculateNetWorkTimes(startTime, endTime, breakMinutes) {
+      const [startHour, startMinute] = startTime.split(":").map(Number);
+      const [endHour, endMinute] = endTime.split(":").map(Number);
+
+      const startTotal = startHour * 60 + startMinute;
+      const endTotal = endHour * 60 + endMinute;
+
+      const grossMinutes = endTotal - startTotal;
+      const netMinutes = grossMinutes - breakMinutes;
+
+      return {
+        grossMinutes,
+        netMinutes
+      };
+    }
+
+    function clearReportForm() {
+      document.getElementById("work_date").value = "";
+      document.getElementById("start_time").value = "";
+      document.getElementById("end_time").value = "";
+      document.getElementById("break_minutes").value = "0";
+      document.getElementById("travel_cost").value = "0";
+      document.getElementById("hourly_rate").value = "65";
+      document.getElementById("description").value = "";
+      document.getElementById("notes").value = "";
+      clearMaterials();
+    }
+
+    async function createReport() {
+      clearMessage("reportMessage");
+      document.getElementById("result").innerText = "Bericht wird erstellt...";
+
+      const customerId = document.getElementById("customerSelect").value;
+      const customerText = document.getElementById("customerSelect").selectedOptions[0]?.text || "-";
+      const workDate = document.getElementById("work_date").value;
+      const startTime = document.getElementById("start_time").value;
+      const endTime = document.getElementById("end_time").value;
+      const breakMinutes = parseInt(document.getElementById("break_minutes").value || "0", 10);
+      const hourlyRate = parseFloat(document.getElementById("hourly_rate").value || "0");
+      const travelCost = parseFloat(document.getElementById("travel_cost").value || "0");
+      const description = document.getElementById("description").value.trim();
+      const notes = document.getElementById("notes").value.trim();
+
+      if (!customerId || !workDate || !startTime || !endTime || !description) {
+        showMessage("reportMessage", "Bitte Kunde, Datum, Zeiten und Beschreibung ausfüllen.", "error");
+        document.getElementById("result").innerText = "Noch kein Bericht erstellt.";
+        return;
+      }
+
+      if (breakMinutes < 0) {
+        showMessage("reportMessage", "Pause darf nicht negativ sein.", "error");
+        document.getElementById("result").innerText = "Noch kein Bericht erstellt.";
+        return;
+      }
+
+      const { grossMinutes, netMinutes } = calculateNetWorkTimes(startTime, endTime, breakMinutes);
+
+      if (grossMinutes <= 0) {
+        showMessage("reportMessage", "Endzeit muss nach der Startzeit liegen.", "error");
+        document.getElementById("result").innerText = "Noch kein Bericht erstellt.";
+        return;
+      }
+
+      if (netMinutes <= 0) {
+        showMessage("reportMessage", "Die Pause ist zu lang. Netto-Arbeitszeit muss größer als 0 sein.", "error");
+        document.getElementById("result").innerText = "Noch kein Bericht erstellt.";
+        return;
+      }
+
+      const adjustedEndTotal = (() => {
+        const [endHour, endMinute] = endTime.split(":").map(Number);
+        return endHour * 60 + endMinute - breakMinutes;
+      })();
+
+      const adjustedEndHour = String(Math.floor(adjustedEndTotal / 60)).padStart(2, "0");
+      const adjustedEndMinute = String(adjustedEndTotal % 60).padStart(2, "0");
+      const adjustedEndTime = `${adjustedEndHour}:${adjustedEndMinute}`;
+
+      const payload = {
+        customer_id: parseInt(customerId),
+        work_date: workDate,
+        start_time: startTime,
+        end_time: adjustedEndTime,
+        description: description,
+        notes: notes || `Pause: ${breakMinutes} Minuten`,
+        hourly_rate: hourlyRate,
+        travel_cost: travelCost,
+        materials: materials
+      };
+
+      try {
+        const res = await fetch(`${API_BASE}/job-reports`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify(payload)
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+          console.error("Backend-Fehler Bericht:", data);
+          showMessage("reportMessage", "Fehler beim Erstellen des Berichts.", "error");
+          document.getElementById("result").innerText = "Fehler beim Erstellen des Berichts.";
+          return;
+        }
+
+        const materialLines = (data.materials && data.materials.length > 0)
+          ? data.materials.map(item => `- ${item.name}: ${item.quantity} ${item.unit} x ${item.unit_price} € = ${item.total_price} €`).join("\n")
+          : "Keine Materialien erfasst.";
+
+        document.getElementById("result").innerText =
+`Bericht erfolgreich erstellt
+
+Kunde: ${customerText}
+Arbeitsdatum: ${data.work_date}
+Arbeitszeit brutto: ${grossMinutes} Minuten
+Pause: ${breakMinutes} Minuten
+Arbeitszeit netto: ${data.labor_minutes} Minuten
+
+Arbeitskosten: ${data.labor_cost} €
+Materialkosten: ${data.material_cost} €
+Fahrtkosten: ${data.travel_cost} €
+Gesamtkosten: ${data.total_cost} €
+
+Beschreibung:
+${data.description}
+
+Notizen:
+${data.notes || "-"}
+
+Material:
+${materialLines}`;
+
+        showMessage("reportMessage", "Bericht erfolgreich erstellt.", "success");
+        clearReportForm();
+        await loadReports();
+
+      } catch (err) {
+        console.error("Fehler beim Erstellen des Berichts:", err);
+        showMessage("reportMessage", "Fehler beim Erstellen des Berichts.", "error");
+        document.getElementById("result").innerText = "Fehler beim Erstellen des Berichts.";
+      }
+    }
+
+    async function loadReports() {
+      try {
+        const res = await fetch(`${API_BASE}/job-reports`);
+        const data = await res.json();
+
+        const reportList = document.getElementById("reportList");
+        reportList.innerHTML = "";
+
+        if (!Array.isArray(data) || data.length === 0) {
+          reportList.innerHTML = "<li class='report-item'><strong>Noch keine Berichte vorhanden.</strong></li>";
+          document.getElementById("reportCount").textContent = "0";
+          document.getElementById("lastTotal").textContent = "0 €";
+          return;
+        }
+
+        data.forEach(report => {
+          const li = document.createElement("li");
+          li.className = "report-item";
+          li.innerHTML = `
+            <strong>Bericht #${report.id}</strong>
+            <div class="muted">Kunde: ${report.customer_name || "ID " + report.customer_id}</div>
+            <div class="muted">Datum: ${report.work_date}</div>
+            <div class="muted">Gesamt: ${report.total_cost} €</div>
+          `;
+          li.onclick = () => loadReportDetail(report.id);
+          reportList.appendChild(li);
+        });
+
+        document.getElementById("reportCount").textContent = data.length;
+        document.getElementById("lastTotal").textContent = formatEuro(data[0].total_cost);
+
+      } catch (err) {
+        console.error("Fehler beim Laden der Berichte:", err);
+      }
+    }
+
+    async function loadReportDetail(reportId) {
+      try {
+        const res = await fetch(`${API_BASE}/job-reports/${reportId}`);
+        const data = await res.json();
+
+        if (!res.ok) {
+          document.getElementById("reportDetail").innerText = "Berichtsdetails konnten nicht geladen werden.";
+          return;
+        }
+
+        const materialLines = (data.materials && data.materials.length > 0)
+          ? data.materials.map(item => `- ${item.name}: ${item.quantity} ${item.unit} x ${item.unit_price} € = ${item.total_price} €`).join("\n")
+          : "Keine Materialien erfasst.";
+
+        document.getElementById("reportDetail").innerText =
+`Bericht #${data.id}
+
+Kunde ID: ${data.customer_id}
+Datum: ${data.work_date}
+Start: ${data.start_time}
+Ende: ${data.end_time}
+
+Beschreibung:
+${data.description}
+
+Notizen:
+${data.notes || "-"}
+
+Arbeitszeit netto: ${data.labor_minutes} Minuten
+Arbeitskosten: ${data.labor_cost} €
+Materialkosten: ${data.material_cost} €
+Fahrtkosten: ${data.travel_cost} €
+Gesamtkosten: ${data.total_cost} €
+
+Material:
+${materialLines}`;
+
+      } catch (err) {
+        console.error("Fehler beim Laden der Berichtsdetails:", err);
+        document.getElementById("reportDetail").innerText = "Fehler beim Laden der Berichtsdetails.";
+      }
+    }
+
+    renderMaterials();
+    loadCustomers();
+    loadReports();
+  </script>
+</body>
+</html>

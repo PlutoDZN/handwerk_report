@@ -56,10 +56,10 @@ class JobReportCreate(BaseModel):
     travel_cost: float = 0
     materials: List[MaterialItemCreate]
 
-
 class JobReportListResponse(BaseModel):
     id: int
     customer_id: int
+    customer_name: str | None = None
     work_date: date
     total_cost: float
     created_at: datetime

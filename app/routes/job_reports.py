@@ -78,14 +78,32 @@ def create_job_report(data: JobReportCreate, db: Session = Depends(get_db)):
 
 @router.get("/job-reports", response_model=list[JobReportListResponse])
 def list_job_reports(db: Session = Depends(get_db)):
-    return db.query(JobReport).order_by(JobReport.id.desc()).all()
+    reports = (
+        db.query(JobReport)
+        .options(joinedload(JobReport.customer))
+        .order_by(JobReport.id.desc())
+        .all()
+    )
+
+    result = []
+    for report in reports:
+        result.append({
+            "id": report.id,
+            "customer_id": report.customer_id,
+            "customer_name": report.customer.name if report.customer else None,
+            "work_date": report.work_date,
+            "total_cost": report.total_cost,
+            "created_at": report.created_at,
+        })
+
+    return result
 
 
 @router.get("/job-reports/{report_id}", response_model=JobReportResponse)
 def get_job_report(report_id: int, db: Session = Depends(get_db)):
     report = (
         db.query(JobReport)
-        .options(joinedload(JobReport.materials))
+        .options(joinedload(JobReport.materials), joinedload(JobReport.customer))
         .filter(JobReport.id == report_id)
         .first()
     )
@@ -94,3 +112,4 @@ def get_job_report(report_id: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Bericht nicht gefunden.")
 
     return report
+
