@@ -16,7 +16,11 @@ class Customer(Base):
     email = Column(String, nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow)
 
-    job_reports = relationship("JobReport", back_populates="customer")
+    job_reports = relationship(
+        "JobReport",
+        back_populates="customer",
+        cascade="all, delete-orphan"
+    )
 
 
 class JobReport(Base):

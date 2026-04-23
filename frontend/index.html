@@ -531,55 +531,53 @@
       }
     }
 
-    async function addCustomer() {
-      clearMessage("customerMessage");
+async function loadCustomers() {
+  try {
+    const res = await fetch(`${API_BASE}/customers`);
+    const data = await res.json();
 
-      const payload = {
-        name: document.getElementById("name").value.trim(),
-        street: document.getElementById("street").value.trim(),
-        zip_code: document.getElementById("zip_code").value.trim(),
-        city: document.getElementById("city").value.trim(),
-        phone: document.getElementById("phone").value.trim(),
-        email: document.getElementById("email").value.trim() || null
-      };
+    const list = document.getElementById("customerList");
+    const select = document.getElementById("customerSelect");
 
-      if (!payload.name || !payload.street || !payload.zip_code || !payload.city || !payload.phone) {
-        showMessage("customerMessage", "Bitte alle Pflichtfelder für den Kunden ausfüllen.", "error");
-        return;
-      }
+    list.innerHTML = "";
+    select.innerHTML = "";
 
-      try {
-        const res = await fetch(`${API_BASE}/customers`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify(payload)
-        });
-
-        if (!res.ok) {
-          const errorData = await res.json();
-          console.error("Backend-Fehler:", errorData);
-          showMessage("customerMessage", "Fehler beim Speichern des Kunden.", "error");
-          return;
-        }
-
-        showMessage("customerMessage", "Kunde erfolgreich gespeichert.", "success");
-
-        document.getElementById("name").value = "";
-        document.getElementById("street").value = "";
-        document.getElementById("zip_code").value = "";
-        document.getElementById("city").value = "";
-        document.getElementById("phone").value = "";
-        document.getElementById("email").value = "";
-
-        await loadCustomers();
-
-      } catch (err) {
-        console.error("Fehler beim Speichern:", err);
-        showMessage("customerMessage", "Fehler beim Speichern des Kunden.", "error");
-      }
+    if (!Array.isArray(data) || data.length === 0) {
+      list.innerHTML = "<li class='customer-item'><strong>Noch keine Kunden vorhanden.</strong></li>";
+      const option = document.createElement("option");
+      option.value = "";
+      option.text = "Keine Kunden vorhanden";
+      select.appendChild(option);
+      document.getElementById("customerCount").textContent = "0";
+      document.getElementById("lastCustomer").textContent = "-";
+      return;
     }
+
+    data.forEach(customer => {
+      const li = document.createElement("li");
+      li.className = "customer-item";
+      li.innerHTML = `
+        <strong>${customer.name}</strong>
+        <div class="muted">${customer.street}, ${customer.zip_code} ${customer.city}</div>
+        <div class="muted">${customer.phone}${customer.email ? " · " + customer.email : ""}</div>
+        <button class="danger-btn" style="margin-top:10px;" onclick="deleteCustomer(${customer.id})">Kunde löschen</button>
+      `;
+      list.appendChild(li);
+
+      const option = document.createElement("option");
+      option.value = customer.id;
+      option.text = `${customer.name} (${customer.city})`;
+      select.appendChild(option);
+    });
+
+    document.getElementById("customerCount").textContent = data.length;
+    document.getElementById("lastCustomer").textContent = data[0]?.name || "-";
+
+  } catch (err) {
+    console.error("Fehler beim Laden der Kunden:", err);
+    showMessage("customerMessage", "Kunden konnten nicht geladen werden.", "error");
+  }
+}
 
     function renderMaterials() {
       const list = document.getElementById("materialList");
@@ -788,40 +786,41 @@ ${materialLines}`;
     }
 
     async function loadReports() {
-      try {
-        const res = await fetch(`${API_BASE}/job-reports`);
-        const data = await res.json();
+  try {
+    const res = await fetch(`${API_BASE}/job-reports`);
+    const data = await res.json();
 
-        const reportList = document.getElementById("reportList");
-        reportList.innerHTML = "";
+    const reportList = document.getElementById("reportList");
+    reportList.innerHTML = "";
 
-        if (!Array.isArray(data) || data.length === 0) {
-          reportList.innerHTML = "<li class='report-item'><strong>Noch keine Berichte vorhanden.</strong></li>";
-          document.getElementById("reportCount").textContent = "0";
-          document.getElementById("lastTotal").textContent = "0 €";
-          return;
-        }
-
-        data.forEach(report => {
-          const li = document.createElement("li");
-          li.className = "report-item";
-          li.innerHTML = `
-            <strong>Bericht #${report.id}</strong>
-            <div class="muted">Kunde: ${report.customer_name || "ID " + report.customer_id}</div>
-            <div class="muted">Datum: ${report.work_date}</div>
-            <div class="muted">Gesamt: ${report.total_cost} €</div>
-          `;
-          li.onclick = () => loadReportDetail(report.id);
-          reportList.appendChild(li);
-        });
-
-        document.getElementById("reportCount").textContent = data.length;
-        document.getElementById("lastTotal").textContent = formatEuro(data[0].total_cost);
-
-      } catch (err) {
-        console.error("Fehler beim Laden der Berichte:", err);
-      }
+    if (!Array.isArray(data) || data.length === 0) {
+      reportList.innerHTML = "<li class='report-item'><strong>Noch keine Berichte vorhanden.</strong></li>";
+      document.getElementById("reportCount").textContent = "0";
+      document.getElementById("lastTotal").textContent = "0 €";
+      return;
     }
+
+    data.forEach(report => {
+      const li = document.createElement("li");
+      li.className = "report-item";
+      li.innerHTML = `
+        <strong>Bericht #${report.id}</strong>
+        <div class="muted">Kunde: ${report.customer_name || "ID " + report.customer_id}</div>
+        <div class="muted">Datum: ${report.work_date}</div>
+        <div class="muted">Gesamt: ${report.total_cost} €</div>
+        <button class="danger-btn" style="margin-top:10px;" onclick="event.stopPropagation(); deleteReport(${report.id})">Bericht löschen</button>
+      `;
+      li.onclick = () => loadReportDetail(report.id);
+      reportList.appendChild(li);
+    });
+
+    document.getElementById("reportCount").textContent = data.length;
+    document.getElementById("lastTotal").textContent = formatEuro(data[0].total_cost);
+
+  } catch (err) {
+    console.error("Fehler beim Laden der Berichte:", err);
+  }
+}
 
     async function loadReportDetail(reportId) {
       try {
@@ -865,6 +864,51 @@ ${materialLines}`;
         document.getElementById("reportDetail").innerText = "Fehler beim Laden der Berichtsdetails.";
       }
     }
+
+    async function deleteCustomer(customerId) {
+  const confirmed = confirm("Kunde wirklich löschen?");
+  if (!confirmed) return;
+
+  try {
+    const res = await fetch(`${API_BASE}/customers/${customerId}`, {
+      method: "DELETE"
+    });
+
+    if (!res.ok) {
+      alert("Fehler beim Löschen des Kunden.");
+      return;
+    }
+
+    await loadCustomers();
+    await loadReports();
+    document.getElementById("reportDetail").innerText = "Noch kein Bericht ausgewählt.";
+    document.getElementById("result").innerText = "Noch kein Bericht erstellt.";
+  } catch (err) {
+    console.error("Fehler beim Löschen des Kunden:", err);
+  }
+}
+
+async function deleteReport(reportId) {
+  const confirmed = confirm("Bericht wirklich löschen?");
+  if (!confirmed) return;
+
+  try {
+    const res = await fetch(`${API_BASE}/job-reports/${reportId}`, {
+      method: "DELETE"
+    });
+
+    if (!res.ok) {
+      alert("Fehler beim Löschen des Berichts.");
+      return;
+    }
+
+    await loadReports();
+    document.getElementById("reportDetail").innerText = "Bericht gelöscht.";
+    document.getElementById("result").innerText = "Noch kein Bericht erstellt.";
+  } catch (err) {
+    console.error("Fehler beim Löschen des Berichts:", err);
+  }
+}
 
     renderMaterials();
     loadCustomers();

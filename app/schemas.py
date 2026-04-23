@@ -87,3 +87,23 @@ class JobReportResponse(BaseModel):
 
     class Config:
         from_attributes = True
+
+class CustomerUpdate(BaseModel):
+    name: str
+    street: str
+    zip_code: str
+    city: str
+    phone: str
+    email: Optional[EmailStr] = None
+
+
+class JobReportUpdate(BaseModel):
+    customer_id: int
+    work_date: date
+    start_time: str
+    end_time: str
+    description: str
+    notes: Optional[str] = None
+    hourly_rate: float
+    travel_cost: float = 0
+    materials: List[MaterialItemCreate]
