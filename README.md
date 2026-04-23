@@ -46,8 +46,9 @@ Frontend:
 ### 1. Repo klonen
 
 ```bash
-git clone https://github.com/DEIN_USERNAME/handwerk-report.git
-cd handwerk-report/backend
+git clone https://github.com/PlutoDZN/handwerk_report.git
+cd handwerk_report
+code .
 ```
 
 ---
