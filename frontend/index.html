@@ -360,6 +360,7 @@
       <button id="navCustomers" onclick="showView('customers')">Kunden</button>
       <button id="navReports" onclick="showView('reports')">Berichte</button>
       <button id="navNewReport" onclick="showView('newReport')">Neuer Bericht</button>
+      <button id="navSettings" onclick="showView('settings')">Einstellungen</button>
     </div>
 
     <section id="viewDashboard" class="view active">
@@ -400,7 +401,16 @@
       <div class="grid">
         <div class="card">
           <h2>Kundenliste</h2>
-          <ul id="customerList" class="customer-list"></ul>
+
+<div class="field-group">
+  <input
+    id="customerSearch"
+    placeholder="Kunde suchen (Name, Ort, Telefon...)"
+    oninput="filterCustomers()"
+  />
+</div>
+
+<ul id="customerList" class="customer-list"></ul>
         </div>
 
         <div class="card">
@@ -453,9 +463,40 @@
       <div class="grid">
         <div class="card">
           <h2>Berichtshistorie</h2>
-          <button class="secondary-btn" onclick="loadReports()">Berichte aktualisieren</button>
-          <div class="hint">Klicke auf einen Bericht, um Details zu sehen.</div>
-          <ul id="reportList" class="report-list" style="margin-top:14px;"></ul>
+
+<div class="field-group">
+  <input
+    id="reportSearch"
+    placeholder="Berichte suchen (Kunde, Datum...)"
+    oninput="filterReports()"
+  />
+</div>
+
+<div class="row">
+  <div class="field-group">
+    <label for="reportDateFilter">Datum filtern</label>
+    <input
+      id="reportDateFilter"
+      type="date"
+      onchange="filterReports()"
+    />
+  </div>
+
+  <div class="field-group">
+    <label>&nbsp;</label>
+    <button class="light-btn" onclick="resetReportFilters()">
+      Filter zurücksetzen
+    </button>
+  </div>
+</div>
+
+<button class="secondary-btn" onclick="loadReports()">Berichte aktualisieren</button>
+
+<div class="hint">
+  Klicke auf einen Bericht, um Details zu sehen.
+</div>
+
+<ul id="reportList" class="report-list" style="margin-top:14px;"></ul>
         </div>
 
         <div class="card">
@@ -562,6 +603,39 @@
         <div id="result" class="result-box">Noch kein Bericht erstellt.</div>
       </div>
     </section>
+    <section id="viewSettings" class="view">
+  <div class="card">
+    <h2>Firmeneinstellungen</h2>
+
+    <div class="field-group">
+      <label>Firmenname</label>
+      <input id="companyName" placeholder="z. B. Muster Sanitär GmbH">
+    </div>
+
+    <div class="field-group">
+      <label>Adresse</label>
+      <input id="companyAddress" placeholder="Musterstraße 1, 72525 Münsingen">
+    </div>
+
+    <div class="field-group">
+      <label>Telefon</label>
+      <input id="companyPhone" placeholder="07381 123456">
+    </div>
+
+    <div class="field-group">
+      <label>E-Mail</label>
+      <input id="companyEmail" placeholder="info@firma.de">
+    </div>
+
+    <div class="field-group">
+      <label>Standard-Stundensatz (€)</label>
+      <input id="defaultHourlyRate" type="number" step="0.01" value="65">
+    </div>
+
+    <button onclick="saveSettings()">Einstellungen speichern</button>
+    <div id="settingsMessage"></div>
+  </div>
+</section>
   </div>
 
   <script>
@@ -572,7 +646,7 @@
     let materials = [];
 
     function showView(viewName) {
-      const views = ["dashboard", "customers", "reports", "newReport"];
+      const views = ["dashboard", "customers", "reports", "newReport", "settings"];
       views.forEach(name => {
         document.getElementById(`view${capitalize(name)}`).classList.remove("active");
         document.getElementById(`nav${capitalize(name)}`).classList.remove("active");
@@ -755,6 +829,41 @@
         console.error("Fehler beim Löschen des Kunden:", err);
       }
     }
+
+    function saveSettings() {
+  const settings = {
+    companyName: document.getElementById("companyName").value.trim(),
+    companyAddress: document.getElementById("companyAddress").value.trim(),
+    companyPhone: document.getElementById("companyPhone").value.trim(),
+    companyEmail: document.getElementById("companyEmail").value.trim(),
+    defaultHourlyRate: document.getElementById("defaultHourlyRate").value || "65"
+  };
+
+  localStorage.setItem("handwerkReportSettings", JSON.stringify(settings));
+  document.getElementById("hourly_rate").value = settings.defaultHourlyRate;
+
+  showMessage("settingsMessage", "Einstellungen gespeichert.", "success");
+}
+
+function loadSettings() {
+  const saved = localStorage.getItem("handwerkReportSettings");
+
+  if (!saved) return;
+
+  const settings = JSON.parse(saved);
+
+  document.getElementById("companyName").value = settings.companyName || "";
+  document.getElementById("companyAddress").value = settings.companyAddress || "";
+  document.getElementById("companyPhone").value = settings.companyPhone || "";
+  document.getElementById("companyEmail").value = settings.companyEmail || "";
+  document.getElementById("defaultHourlyRate").value = settings.defaultHourlyRate || "65";
+  document.getElementById("hourly_rate").value = settings.defaultHourlyRate || "65";
+}
+
+function getSettings() {
+  const saved = localStorage.getItem("handwerkReportSettings");
+  return saved ? JSON.parse(saved) : {};
+}
 
     function renderMaterials() {
       const list = document.getElementById("materialList");
@@ -1037,8 +1146,15 @@ ${materialLines}`;
             <div class="muted">Datum: ${data.work_date}</div>
           </div>
           <div style="text-align:right;">
-            <strong>Handwerk Report</strong><br>
-            <span class="muted">Digitaler Arbeitsbericht</span>
+            ${(() => {
+            const settings = getSettings();
+            return `
+            <strong>${settings.companyName || "Handwerk Report"}</strong><br>
+            <span class="muted">${settings.companyAddress || "Digitaler Arbeitsbericht"}</span><br>
+            <span class="muted">${settings.companyPhone || ""}</span><br>
+            <span class="muted">${settings.companyEmail || ""}</span>
+            `;
+            })()}
           </div>
         </div>
 
@@ -1238,7 +1354,101 @@ ${materialLines}`;
 
   printWindow.document.close();
 }
+function filterCustomers() {
+  const search = document.getElementById("customerSearch").value.toLowerCase();
+  const list = document.getElementById("customerList");
 
+  list.innerHTML = "";
+
+  const filtered = customers.filter(customer => {
+    return (
+      customer.name.toLowerCase().includes(search) ||
+      customer.city.toLowerCase().includes(search) ||
+      customer.phone.toLowerCase().includes(search) ||
+      (customer.email || "").toLowerCase().includes(search)
+    );
+  });
+
+  if (filtered.length === 0) {
+    list.innerHTML = `
+      <li class="customer-item">
+        <strong>Keine Kunden gefunden.</strong>
+      </li>
+    `;
+    return;
+  }
+
+  filtered.forEach(customer => {
+    const li = document.createElement("li");
+    li.className = "customer-item";
+
+    li.innerHTML = `
+      <strong>${customer.name}</strong>
+      <div class="muted">
+        ${customer.street}, ${customer.zip_code} ${customer.city}
+      </div>
+      <div class="muted">
+        ${customer.phone}${customer.email ? " · " + customer.email : ""}
+      </div>
+
+      <div class="actions">
+        <button class="secondary-btn" onclick="editCustomer(${customer.id})">
+          Bearbeiten
+        </button>
+
+        <button class="danger-btn" onclick="deleteCustomer(${customer.id})">
+          Löschen
+        </button>
+      </div>
+    `;
+
+    list.appendChild(li);
+  });
+}
+
+
+function filterReports() {
+  const search = document.getElementById("reportSearch").value.toLowerCase();
+  const dateFilter = document.getElementById("reportDateFilter").value;
+  const list = document.getElementById("reportList");
+
+  list.innerHTML = "";
+
+  const filtered = reports.filter(report => {
+    const matchesSearch =
+      (report.customer_name || "").toLowerCase().includes(search) ||
+      String(report.id).includes(search) ||
+      String(report.work_date).includes(search);
+
+    const matchesDate =
+      !dateFilter || report.work_date === dateFilter;
+
+    return matchesSearch && matchesDate;
+  });
+
+  if (filtered.length === 0) {
+    list.innerHTML = `
+      <li class="report-item">
+        <strong>Keine Berichte gefunden.</strong>
+      </li>
+    `;
+    return;
+  }
+
+  filtered.forEach(report => {
+    const li = createReportListItem(report);
+    list.appendChild(li);
+  });
+}
+
+
+function resetReportFilters() {
+  document.getElementById("reportSearch").value = "";
+  document.getElementById("reportDateFilter").value = "";
+  filterReports();
+}
+
+    loadSettings();
     renderMaterials();
     loadCustomers();
     loadReports();
