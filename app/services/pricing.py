@@ -1,20 +1,30 @@
 from datetime import datetime
 
 
-def calculate_labor_minutes(start_time: str, end_time: str) -> int:
+def calculate_labor_minutes(start_time: str, end_time: str, pause_minutes: int = 0) -> int:
     start = datetime.strptime(start_time, "%H:%M")
     end = datetime.strptime(end_time, "%H:%M")
 
     diff = end - start
-    minutes = int(diff.total_seconds() // 60)
+    gross_minutes = int(diff.total_seconds() // 60)
 
-    if minutes <= 0:
+    if gross_minutes <= 0:
         raise ValueError("Endzeit muss nach Startzeit liegen.")
 
-    return minutes
+    if pause_minutes < 0:
+        raise ValueError("Pause darf nicht negativ sein.")
+
+    net_minutes = gross_minutes - pause_minutes
+
+    if net_minutes <= 0:
+        raise ValueError("Pause ist zu lang. Netto-Arbeitszeit muss größer als 0 sein.")
+
+    return net_minutes
 
 
 def calculate_labor_cost(labor_minutes: int, hourly_rate: float) -> float:
+    if hourly_rate < 0:
+        raise ValueError("Stundenlohn darf nicht negativ sein.")
     return round((labor_minutes / 60) * hourly_rate, 2)
 
 

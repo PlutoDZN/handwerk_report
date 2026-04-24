@@ -31,6 +31,7 @@ class JobReport(Base):
     work_date = Column(Date, nullable=False)
     start_time = Column(String, nullable=False)
     end_time = Column(String, nullable=False)
+    pause_minutes = Column(Integer, default=0, nullable=False)
     description = Column(String, nullable=False)
     notes = Column(String, nullable=True)
     hourly_rate = Column(Float, nullable=False)

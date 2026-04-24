@@ -26,6 +26,15 @@ class CustomerResponse(BaseModel):
         from_attributes = True
 
 
+class CustomerUpdate(BaseModel):
+    name: str
+    street: str
+    zip_code: str
+    city: str
+    phone: str
+    email: Optional[EmailStr] = None
+
+
 class MaterialItemCreate(BaseModel):
     name: str
     quantity: float
@@ -50,17 +59,33 @@ class JobReportCreate(BaseModel):
     work_date: date
     start_time: str
     end_time: str
+    pause_minutes: int = 0
     description: str
     notes: Optional[str] = None
     hourly_rate: float
     travel_cost: float = 0
     materials: List[MaterialItemCreate]
 
+
+class JobReportUpdate(BaseModel):
+    customer_id: int
+    work_date: date
+    start_time: str
+    end_time: str
+    pause_minutes: int = 0
+    description: str
+    notes: Optional[str] = None
+    hourly_rate: float
+    travel_cost: float = 0
+    materials: List[MaterialItemCreate]
+
+
 class JobReportListResponse(BaseModel):
     id: int
     customer_id: int
     customer_name: str | None = None
     work_date: date
+    pause_minutes: int
     total_cost: float
     created_at: datetime
 
@@ -71,9 +96,11 @@ class JobReportListResponse(BaseModel):
 class JobReportResponse(BaseModel):
     id: int
     customer_id: int
+    customer: Optional[CustomerResponse] = None
     work_date: date
     start_time: str
     end_time: str
+    pause_minutes: int
     description: str
     notes: Optional[str] = None
     hourly_rate: float
@@ -87,23 +114,3 @@ class JobReportResponse(BaseModel):
 
     class Config:
         from_attributes = True
-
-class CustomerUpdate(BaseModel):
-    name: str
-    street: str
-    zip_code: str
-    city: str
-    phone: str
-    email: Optional[EmailStr] = None
-
-
-class JobReportUpdate(BaseModel):
-    customer_id: int
-    work_date: date
-    start_time: str
-    end_time: str
-    description: str
-    notes: Optional[str] = None
-    hourly_rate: float
-    travel_cost: float = 0
-    materials: List[MaterialItemCreate]

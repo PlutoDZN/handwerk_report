@@ -26,6 +26,27 @@ def get_db():
         db.close()
 
 
+def build_material_items(materials):
+    material_items = []
+    material_cost = 0.0
+
+    for item in materials:
+        total_price = calculate_material_total(item.quantity, item.unit_price)
+        material_cost += total_price
+
+        material_items.append(
+            MaterialItem(
+                name=item.name,
+                quantity=item.quantity,
+                unit=item.unit,
+                unit_price=item.unit_price,
+                total_price=total_price,
+            )
+        )
+
+    return material_items, round(material_cost, 2)
+
+
 @router.post("/job-reports", response_model=JobReportResponse)
 def create_job_report(data: JobReportCreate, db: Session = Depends(get_db)):
     customer = db.query(Customer).filter(Customer.id == data.customer_id).first()
@@ -33,27 +54,14 @@ def create_job_report(data: JobReportCreate, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Kunde nicht gefunden.")
 
     try:
-        labor_minutes = calculate_labor_minutes(data.start_time, data.end_time)
+        labor_minutes = calculate_labor_minutes(
+            data.start_time,
+            data.end_time,
+            data.pause_minutes
+        )
         labor_cost = calculate_labor_cost(labor_minutes, data.hourly_rate)
 
-        material_items = []
-        material_cost = 0.0
-
-        for item in data.materials:
-            total_price = calculate_material_total(item.quantity, item.unit_price)
-            material_cost += total_price
-
-            material_items.append(
-                MaterialItem(
-                    name=item.name,
-                    quantity=item.quantity,
-                    unit=item.unit,
-                    unit_price=item.unit_price,
-                    total_price=total_price,
-                )
-            )
-
-        material_cost = round(material_cost, 2)
+        material_items, material_cost = build_material_items(data.materials)
         total_cost = calculate_total_cost(labor_cost, material_cost, data.travel_cost)
 
     except ValueError as e:
@@ -64,6 +72,7 @@ def create_job_report(data: JobReportCreate, db: Session = Depends(get_db)):
         work_date=data.work_date,
         start_time=data.start_time,
         end_time=data.end_time,
+        pause_minutes=data.pause_minutes,
         description=data.description,
         notes=data.notes,
         hourly_rate=data.hourly_rate,
@@ -77,7 +86,14 @@ def create_job_report(data: JobReportCreate, db: Session = Depends(get_db)):
 
     db.add(report)
     db.commit()
-    db.refresh(report)
+
+    report = (
+        db.query(JobReport)
+        .options(joinedload(JobReport.materials), joinedload(JobReport.customer))
+        .filter(JobReport.id == report.id)
+        .first()
+    )
+
     return report
 
 
@@ -97,6 +113,7 @@ def list_job_reports(db: Session = Depends(get_db)):
             "customer_id": report.customer_id,
             "customer_name": report.customer.name if report.customer else None,
             "work_date": report.work_date,
+            "pause_minutes": report.pause_minutes,
             "total_cost": report.total_cost,
             "created_at": report.created_at,
         })
@@ -130,27 +147,14 @@ def update_job_report(report_id: int, data: JobReportUpdate, db: Session = Depen
         raise HTTPException(status_code=404, detail="Kunde nicht gefunden.")
 
     try:
-        labor_minutes = calculate_labor_minutes(data.start_time, data.end_time)
+        labor_minutes = calculate_labor_minutes(
+            data.start_time,
+            data.end_time,
+            data.pause_minutes
+        )
         labor_cost = calculate_labor_cost(labor_minutes, data.hourly_rate)
 
-        material_items = []
-        material_cost = 0.0
-
-        for item in data.materials:
-            total_price = calculate_material_total(item.quantity, item.unit_price)
-            material_cost += total_price
-
-            material_items.append(
-                MaterialItem(
-                    name=item.name,
-                    quantity=item.quantity,
-                    unit=item.unit,
-                    unit_price=item.unit_price,
-                    total_price=total_price,
-                )
-            )
-
-        material_cost = round(material_cost, 2)
+        material_items, material_cost = build_material_items(data.materials)
         total_cost = calculate_total_cost(labor_cost, material_cost, data.travel_cost)
 
     except ValueError as e:
@@ -160,6 +164,7 @@ def update_job_report(report_id: int, data: JobReportUpdate, db: Session = Depen
     report.work_date = data.work_date
     report.start_time = data.start_time
     report.end_time = data.end_time
+    report.pause_minutes = data.pause_minutes
     report.description = data.description
     report.notes = data.notes
     report.hourly_rate = data.hourly_rate
@@ -174,7 +179,14 @@ def update_job_report(report_id: int, data: JobReportUpdate, db: Session = Depen
         report.materials.append(item)
 
     db.commit()
-    db.refresh(report)
+
+    report = (
+        db.query(JobReport)
+        .options(joinedload(JobReport.materials), joinedload(JobReport.customer))
+        .filter(JobReport.id == report_id)
+        .first()
+    )
+
     return report
 
 
