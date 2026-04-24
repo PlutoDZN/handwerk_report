@@ -1,9 +1,10 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Handwerk Report</title>
+
   <style>
     :root {
       --bg: #f5f7fb;
@@ -17,13 +18,13 @@
       --success-bg: #dcfce7;
       --error: #991b1b;
       --error-bg: #fee2e2;
+      --info-bg: #eef2ff;
+      --info-text: #1e3a8a;
       --shadow: 0 10px 30px rgba(17, 24, 39, 0.06);
       --radius: 18px;
     }
 
-    * {
-      box-sizing: border-box;
-    }
+    * { box-sizing: border-box; }
 
     body {
       margin: 0;
@@ -39,7 +40,11 @@
     }
 
     .hero {
-      margin-bottom: 24px;
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      align-items: flex-start;
+      margin-bottom: 18px;
     }
 
     .hero h1 {
@@ -51,6 +56,60 @@
       margin: 0;
       color: var(--muted);
       font-size: 16px;
+    }
+
+    .nav {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 20px;
+    }
+
+    .nav button {
+      width: auto;
+      padding: 10px 14px;
+      background: white;
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+
+    .nav button.active {
+      background: var(--primary);
+      color: white;
+    }
+
+    .view {
+      display: none;
+    }
+
+    .view.active {
+      display: block;
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .stat {
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 16px;
+      box-shadow: var(--shadow);
+    }
+
+    .stat-label {
+      color: var(--muted);
+      font-size: 13px;
+      margin-bottom: 8px;
+    }
+
+    .stat-value {
+      font-size: 24px;
+      font-weight: 800;
     }
 
     .grid {
@@ -69,7 +128,8 @@
       margin-bottom: 20px;
     }
 
-    .card h2, .card h3 {
+    .card h2,
+    .card h3 {
       margin-top: 0;
       margin-bottom: 14px;
     }
@@ -122,8 +182,8 @@
     }
 
     .secondary-btn {
-      background: #eef2ff;
-      color: #1e3a8a;
+      background: var(--info-bg);
+      color: var(--info-text);
     }
 
     .secondary-btn:hover {
@@ -136,6 +196,12 @@
 
     .danger-btn:hover {
       background: #991b1b;
+    }
+
+    .light-btn {
+      background: white;
+      color: var(--text);
+      border: 1px solid var(--border);
     }
 
     .message {
@@ -182,7 +248,8 @@
     }
 
     .customer-item strong,
-    .report-item strong {
+    .report-item strong,
+    .material-item strong {
       display: block;
       margin-bottom: 6px;
       font-size: 15px;
@@ -191,6 +258,19 @@
     .muted {
       color: var(--muted);
       font-size: 14px;
+    }
+
+    .actions {
+      display: flex;
+      gap: 8px;
+      margin-top: 10px;
+      flex-wrap: wrap;
+    }
+
+    .actions button {
+      width: auto;
+      flex: 1;
+      min-width: 120px;
     }
 
     .report-item {
@@ -215,32 +295,6 @@
       line-height: 1.6;
     }
 
-    .stats {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 12px;
-      margin-bottom: 20px;
-    }
-
-    .stat {
-      background: white;
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      padding: 16px;
-      box-shadow: var(--shadow);
-    }
-
-    .stat-label {
-      color: var(--muted);
-      font-size: 13px;
-      margin-bottom: 8px;
-    }
-
-    .stat-value {
-      font-size: 24px;
-      font-weight: 800;
-    }
-
     .material-actions {
       display: flex;
       gap: 10px;
@@ -252,6 +306,10 @@
       flex: 1;
     }
 
+    .hidden {
+      display: none;
+    }
+
     @media (max-width: 900px) {
       .grid {
         grid-template-columns: 1fr;
@@ -259,6 +317,10 @@
 
       .stats {
         grid-template-columns: 1fr 1fr;
+      }
+
+      .hero {
+        flex-direction: column;
       }
     }
 
@@ -272,49 +334,127 @@
         font-size: 26px;
       }
 
-      .material-actions {
+      .material-actions,
+      .actions {
         flex-direction: column;
+      }
+
+      .actions button {
+        width: 100%;
       }
     }
   </style>
 </head>
+
 <body>
   <div class="container">
     <div class="hero">
-      <h1>Handwerk Report</h1>
-      <p>Arbeitsberichte, Kunden, Material und Kosten digital erfassen.</p>
-    </div>
-
-    <div class="stats">
-      <div class="stat">
-        <div class="stat-label">Kunden</div>
-        <div class="stat-value" id="customerCount">0</div>
-      </div>
-      <div class="stat">
-        <div class="stat-label">Berichte</div>
-        <div class="stat-value" id="reportCount">0</div>
-      </div>
-      <div class="stat">
-        <div class="stat-label">Letzter Gesamtpreis</div>
-        <div class="stat-value" id="lastTotal">0 €</div>
-      </div>
-      <div class="stat">
-        <div class="stat-label">Letzter Kunde</div>
-        <div class="stat-value" id="lastCustomer">-</div>
-      </div>
-    </div>
-
-    <div class="grid">
       <div>
+        <h1>Handwerk Report</h1>
+        <p>Arbeitsberichte, Kunden, Material und Kosten digital erfassen.</p>
+      </div>
+    </div>
+
+    <div class="nav">
+      <button id="navDashboard" class="active" onclick="showView('dashboard')">Dashboard</button>
+      <button id="navCustomers" onclick="showView('customers')">Kunden</button>
+      <button id="navReports" onclick="showView('reports')">Berichte</button>
+      <button id="navNewReport" onclick="showView('newReport')">Neuer Bericht</button>
+    </div>
+
+    <section id="viewDashboard" class="view active">
+      <div class="stats">
+        <div class="stat">
+          <div class="stat-label">Kunden</div>
+          <div class="stat-value" id="customerCount">0</div>
+        </div>
+        <div class="stat">
+          <div class="stat-label">Berichte</div>
+          <div class="stat-value" id="reportCount">0</div>
+        </div>
+        <div class="stat">
+          <div class="stat-label">Letzter Gesamtpreis</div>
+          <div class="stat-value" id="lastTotal">0 €</div>
+        </div>
+        <div class="stat">
+          <div class="stat-label">Letzter Kunde</div>
+          <div class="stat-value" id="lastCustomer">-</div>
+        </div>
+      </div>
+
+      <div class="grid">
+        <div class="card">
+          <h2>Letzte Berichte</h2>
+          <ul id="dashboardReportList" class="report-list"></ul>
+        </div>
+
+        <div class="card">
+          <h2>Schnellstart</h2>
+          <button onclick="showView('newReport')">Neuen Arbeitsbericht erstellen</button>
+          <button class="secondary-btn" style="margin-top:10px;" onclick="showView('customers')">Kunden verwalten</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="viewCustomers" class="view">
+      <div class="grid">
         <div class="card">
           <h2>Kundenliste</h2>
           <ul id="customerList" class="customer-list"></ul>
         </div>
 
         <div class="card">
+          <h2 id="customerFormTitle">Neuen Kunden anlegen</h2>
+
+          <input type="hidden" id="editingCustomerId">
+
+          <div class="field-group">
+            <label for="name">Name</label>
+            <input id="name" placeholder="z. B. Familie Müller" />
+          </div>
+
+          <div class="field-group">
+            <label for="street">Straße</label>
+            <input id="street" placeholder="z. B. Hauptstraße 12" />
+          </div>
+
+          <div class="row">
+            <div class="field-group">
+              <label for="zip_code">PLZ</label>
+              <input id="zip_code" placeholder="72525" />
+            </div>
+
+            <div class="field-group">
+              <label for="city">Ort</label>
+              <input id="city" placeholder="Münsingen" />
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="field-group">
+              <label for="phone">Telefon</label>
+              <input id="phone" placeholder="01701234567" />
+            </div>
+
+            <div class="field-group">
+              <label for="email">E-Mail</label>
+              <input id="email" placeholder="kunde@example.de" />
+            </div>
+          </div>
+
+          <button onclick="saveCustomer()">Kunde speichern</button>
+          <button class="light-btn" style="margin-top:10px;" onclick="resetCustomerForm()">Abbrechen / Neu</button>
+          <div id="customerMessage"></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="viewReports" class="view">
+      <div class="grid">
+        <div class="card">
           <h2>Berichtshistorie</h2>
           <button class="secondary-btn" onclick="loadReports()">Berichte aktualisieren</button>
-          <div class="hint">Klicke auf einen Bericht, um die Details zu sehen.</div>
+          <div class="hint">Klicke auf einen Bericht, um Details zu sehen.</div>
           <ul id="reportList" class="report-list" style="margin-top:14px;"></ul>
         </div>
 
@@ -323,150 +463,128 @@
           <div id="reportDetail" class="result-box">Noch kein Bericht ausgewählt.</div>
         </div>
       </div>
+    </section>
 
-      <div>
-        <div class="card">
-          <h2>Neuen Kunden anlegen</h2>
+    <section id="viewNewReport" class="view">
+      <div class="card">
+        <h2 id="reportFormTitle">Arbeitsbericht erstellen</h2>
 
-          <div class="field-group">
-            <label for="name">Name</label>
-            <input id="name" placeholder="z. B. Familie Müller">
-          </div>
+        <input type="hidden" id="editingReportId">
 
-          <div class="field-group">
-            <label for="street">Straße</label>
-            <input id="street" placeholder="z. B. Hauptstraße 12">
-          </div>
-
-          <div class="row">
-            <div class="field-group">
-              <label for="zip_code">PLZ</label>
-              <input id="zip_code" placeholder="72525">
-            </div>
-
-            <div class="field-group">
-              <label for="city">Ort</label>
-              <input id="city" placeholder="Münsingen">
-            </div>
-          </div>
-
-          <div class="row">
-            <div class="field-group">
-              <label for="phone">Telefon</label>
-              <input id="phone" placeholder="01701234567">
-            </div>
-
-            <div class="field-group">
-              <label for="email">E-Mail</label>
-              <input id="email" placeholder="kunde@example.de">
-            </div>
-          </div>
-
-          <button onclick="addCustomer()">Kunde speichern</button>
-          <div id="customerMessage"></div>
+        <div class="field-group">
+          <label for="customerSelect">Kunde auswählen</label>
+          <select id="customerSelect"></select>
         </div>
 
-        <div class="card">
-          <h2>Arbeitsbericht erstellen</h2>
-
+        <div class="row">
           <div class="field-group">
-            <label for="customerSelect">Kunde auswählen</label>
-            <select id="customerSelect"></select>
-          </div>
-
-          <div class="row">
-            <div class="field-group">
-              <label for="work_date">Datum</label>
-              <input id="work_date" type="date">
-            </div>
-
-            <div class="field-group">
-              <label for="hourly_rate">Stundenlohn (€)</label>
-              <input id="hourly_rate" type="number" step="0.01" value="65">
-            </div>
-          </div>
-
-          <div class="row">
-            <div class="field-group">
-              <label for="start_time">Startzeit</label>
-              <input id="start_time" type="time">
-            </div>
-
-            <div class="field-group">
-              <label for="end_time">Endzeit</label>
-              <input id="end_time" type="time">
-            </div>
-          </div>
-
-          <div class="row">
-            <div class="field-group">
-              <label for="break_minutes">Pause (Minuten)</label>
-              <input id="break_minutes" type="number" min="0" step="1" value="0">
-              <div class="hint">Wird aktuell im Frontend von der Arbeitszeit abgezogen.</div>
-            </div>
-
-            <div class="field-group">
-              <label for="travel_cost">Fahrtkosten (€)</label>
-              <input id="travel_cost" type="number" step="0.01" value="0">
-            </div>
+            <label for="work_date">Datum</label>
+            <input id="work_date" type="date" />
           </div>
 
           <div class="field-group">
-            <label for="description">Beschreibung</label>
-            <textarea id="description" placeholder="z. B. Wasserhahn ausgetauscht und Anschluss geprüft"></textarea>
+            <label for="hourly_rate">Stundenlohn (€)</label>
+            <input id="hourly_rate" type="number" step="0.01" value="65" />
           </div>
-
-          <div class="field-group">
-            <label for="notes">Notizen</label>
-            <textarea id="notes" placeholder="Optionale Zusatzinfos"></textarea>
-          </div>
-
-          <h3>Material hinzufügen</h3>
-
-          <div class="row">
-            <div class="field-group">
-              <label for="material_name">Materialname</label>
-              <input id="material_name" placeholder="z. B. Wasserhahn">
-            </div>
-
-            <div class="field-group">
-              <label for="material_unit">Einheit</label>
-              <input id="material_unit" placeholder="z. B. Stück">
-            </div>
-          </div>
-
-          <div class="row">
-            <div class="field-group">
-              <label for="material_quantity">Menge</label>
-              <input id="material_quantity" type="number" step="0.01" placeholder="1">
-            </div>
-
-            <div class="field-group">
-              <label for="material_price">Einzelpreis (€)</label>
-              <input id="material_price" type="number" step="0.01" placeholder="79">
-            </div>
-          </div>
-
-          <div class="material-actions">
-            <button type="button" class="secondary-btn" onclick="addMaterial()">Material hinzufügen</button>
-            <button type="button" class="danger-btn" onclick="clearMaterials()">Material leeren</button>
-          </div>
-
-          <div class="hint">Du kannst mehrere Materialpositionen sammeln, bevor du den Bericht speicherst.</div>
-
-          <ul id="materialList" class="material-list" style="margin-top:14px;"></ul>
-
-          <button onclick="createReport()" style="margin-top:16px;">Bericht erstellen</button>
-          <div id="reportMessage"></div>
-          <div id="result" class="result-box">Noch kein Bericht erstellt.</div>
         </div>
+
+        <div class="row">
+          <div class="field-group">
+            <label for="start_time">Startzeit</label>
+            <input id="start_time" type="time" />
+          </div>
+
+          <div class="field-group">
+            <label for="end_time">Endzeit</label>
+            <input id="end_time" type="time" />
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="field-group">
+            <label for="break_minutes">Pause (Minuten)</label>
+            <input id="break_minutes" type="number" min="0" step="1" value="0" />
+          </div>
+
+          <div class="field-group">
+            <label for="travel_cost">Fahrtkosten (€)</label>
+            <input id="travel_cost" type="number" step="0.01" value="0" />
+          </div>
+        </div>
+
+        <div class="field-group">
+          <label for="description">Beschreibung</label>
+          <textarea id="description" placeholder="z. B. Wasserhahn ausgetauscht und Anschluss geprüft"></textarea>
+        </div>
+
+        <div class="field-group">
+          <label for="notes">Notizen</label>
+          <textarea id="notes" placeholder="Optionale Zusatzinfos"></textarea>
+        </div>
+
+        <h3>Material hinzufügen</h3>
+
+        <div class="row">
+          <div class="field-group">
+            <label for="material_name">Materialname</label>
+            <input id="material_name" placeholder="z. B. Wasserhahn" />
+          </div>
+
+          <div class="field-group">
+            <label for="material_unit">Einheit</label>
+            <input id="material_unit" placeholder="z. B. Stück" />
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="field-group">
+            <label for="material_quantity">Menge</label>
+            <input id="material_quantity" type="number" step="0.01" placeholder="1" />
+          </div>
+
+          <div class="field-group">
+            <label for="material_price">Einzelpreis (€)</label>
+            <input id="material_price" type="number" step="0.01" placeholder="79" />
+          </div>
+        </div>
+
+        <div class="material-actions">
+          <button type="button" class="secondary-btn" onclick="addMaterial()">Material hinzufügen</button>
+          <button type="button" class="danger-btn" onclick="clearMaterials()">Material leeren</button>
+        </div>
+
+        <ul id="materialList" class="material-list" style="margin-top:14px;"></ul>
+
+        <button onclick="saveReport()" style="margin-top:16px;">Bericht speichern</button>
+        <button class="light-btn" style="margin-top:10px;" onclick="resetReportForm()">Abbrechen / Neuer Bericht</button>
+
+        <div id="reportMessage"></div>
+        <div id="result" class="result-box">Noch kein Bericht erstellt.</div>
       </div>
-    </div>
+    </section>
   </div>
 
   <script>
     const API_BASE = "http://127.0.0.1:8000";
+
+    let customers = [];
+    let reports = [];
     let materials = [];
+
+    function showView(viewName) {
+      const views = ["dashboard", "customers", "reports", "newReport"];
+      views.forEach(name => {
+        document.getElementById(`view${capitalize(name)}`).classList.remove("active");
+        document.getElementById(`nav${capitalize(name)}`).classList.remove("active");
+      });
+
+      document.getElementById(`view${capitalize(viewName)}`).classList.add("active");
+      document.getElementById(`nav${capitalize(viewName)}`).classList.add("active");
+    }
+
+    function capitalize(value) {
+      return value.charAt(0).toUpperCase() + value.slice(1);
+    }
 
     function showMessage(elementId, message, type = "success") {
       const el = document.getElementById(elementId);
@@ -481,13 +599,19 @@
     }
 
     function formatEuro(value) {
-      return `${Number(value).toFixed(2)} €`;
+      return `${Number(value || 0).toFixed(2)} €`;
+    }
+
+    function calculateGrossMinutes(startTime, endTime) {
+      const [startHour, startMinute] = startTime.split(":").map(Number);
+      const [endHour, endMinute] = endTime.split(":").map(Number);
+      return (endHour * 60 + endMinute) - (startHour * 60 + startMinute);
     }
 
     async function loadCustomers() {
       try {
         const res = await fetch(`${API_BASE}/customers`);
-        const data = await res.json();
+        customers = await res.json();
 
         const list = document.getElementById("customerList");
         const select = document.getElementById("customerSelect");
@@ -495,24 +619,25 @@
         list.innerHTML = "";
         select.innerHTML = "";
 
-        if (!Array.isArray(data) || data.length === 0) {
+        if (!Array.isArray(customers) || customers.length === 0) {
           list.innerHTML = "<li class='customer-item'><strong>Noch keine Kunden vorhanden.</strong></li>";
-          const option = document.createElement("option");
-          option.value = "";
-          option.text = "Keine Kunden vorhanden";
-          select.appendChild(option);
+          select.innerHTML = "<option value=''>Keine Kunden vorhanden</option>";
           document.getElementById("customerCount").textContent = "0";
           document.getElementById("lastCustomer").textContent = "-";
           return;
         }
 
-        data.forEach(customer => {
+        customers.forEach(customer => {
           const li = document.createElement("li");
           li.className = "customer-item";
           li.innerHTML = `
             <strong>${customer.name}</strong>
             <div class="muted">${customer.street}, ${customer.zip_code} ${customer.city}</div>
             <div class="muted">${customer.phone}${customer.email ? " · " + customer.email : ""}</div>
+            <div class="actions">
+              <button class="secondary-btn" onclick="editCustomer(${customer.id})">Bearbeiten</button>
+              <button class="danger-btn" onclick="deleteCustomer(${customer.id})">Löschen</button>
+            </div>
           `;
           list.appendChild(li);
 
@@ -522,8 +647,8 @@
           select.appendChild(option);
         });
 
-        document.getElementById("customerCount").textContent = data.length;
-        document.getElementById("lastCustomer").textContent = data[0]?.name || "-";
+        document.getElementById("customerCount").textContent = customers.length;
+        document.getElementById("lastCustomer").textContent = customers[0]?.name || "-";
 
       } catch (err) {
         console.error("Fehler beim Laden der Kunden:", err);
@@ -531,53 +656,105 @@
       }
     }
 
-async function loadCustomers() {
-  try {
-    const res = await fetch(`${API_BASE}/customers`);
-    const data = await res.json();
-
-    const list = document.getElementById("customerList");
-    const select = document.getElementById("customerSelect");
-
-    list.innerHTML = "";
-    select.innerHTML = "";
-
-    if (!Array.isArray(data) || data.length === 0) {
-      list.innerHTML = "<li class='customer-item'><strong>Noch keine Kunden vorhanden.</strong></li>";
-      const option = document.createElement("option");
-      option.value = "";
-      option.text = "Keine Kunden vorhanden";
-      select.appendChild(option);
-      document.getElementById("customerCount").textContent = "0";
-      document.getElementById("lastCustomer").textContent = "-";
-      return;
+    function resetCustomerForm() {
+      document.getElementById("editingCustomerId").value = "";
+      document.getElementById("customerFormTitle").textContent = "Neuen Kunden anlegen";
+      ["name", "street", "zip_code", "city", "phone", "email"].forEach(id => {
+        document.getElementById(id).value = "";
+      });
+      clearMessage("customerMessage");
     }
 
-    data.forEach(customer => {
-      const li = document.createElement("li");
-      li.className = "customer-item";
-      li.innerHTML = `
-        <strong>${customer.name}</strong>
-        <div class="muted">${customer.street}, ${customer.zip_code} ${customer.city}</div>
-        <div class="muted">${customer.phone}${customer.email ? " · " + customer.email : ""}</div>
-        <button class="danger-btn" style="margin-top:10px;" onclick="deleteCustomer(${customer.id})">Kunde löschen</button>
-      `;
-      list.appendChild(li);
+    function editCustomer(customerId) {
+      const customer = customers.find(c => c.id === customerId);
+      if (!customer) return;
 
-      const option = document.createElement("option");
-      option.value = customer.id;
-      option.text = `${customer.name} (${customer.city})`;
-      select.appendChild(option);
-    });
+      showView("customers");
 
-    document.getElementById("customerCount").textContent = data.length;
-    document.getElementById("lastCustomer").textContent = data[0]?.name || "-";
+      document.getElementById("editingCustomerId").value = customer.id;
+      document.getElementById("customerFormTitle").textContent = `Kunde bearbeiten: ${customer.name}`;
+      document.getElementById("name").value = customer.name;
+      document.getElementById("street").value = customer.street;
+      document.getElementById("zip_code").value = customer.zip_code;
+      document.getElementById("city").value = customer.city;
+      document.getElementById("phone").value = customer.phone;
+      document.getElementById("email").value = customer.email || "";
+    }
 
-  } catch (err) {
-    console.error("Fehler beim Laden der Kunden:", err);
-    showMessage("customerMessage", "Kunden konnten nicht geladen werden.", "error");
-  }
-}
+    async function saveCustomer() {
+      clearMessage("customerMessage");
+
+      const customerId = document.getElementById("editingCustomerId").value;
+
+      const payload = {
+        name: document.getElementById("name").value.trim(),
+        street: document.getElementById("street").value.trim(),
+        zip_code: document.getElementById("zip_code").value.trim(),
+        city: document.getElementById("city").value.trim(),
+        phone: document.getElementById("phone").value.trim(),
+        email: document.getElementById("email").value.trim() || null
+      };
+
+      if (!payload.name || !payload.street || !payload.zip_code || !payload.city || !payload.phone) {
+        showMessage("customerMessage", "Bitte alle Pflichtfelder für den Kunden ausfüllen.", "error");
+        return;
+      }
+
+      try {
+        const url = customerId
+          ? `${API_BASE}/customers/${customerId}`
+          : `${API_BASE}/customers`;
+
+        const method = customerId ? "PUT" : "POST";
+
+        const res = await fetch(url, {
+          method,
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+          console.error("Backend-Fehler Kunde:", data);
+          showMessage("customerMessage", "Fehler beim Speichern des Kunden.", "error");
+          return;
+        }
+
+        showMessage("customerMessage", customerId ? "Kunde aktualisiert." : "Kunde gespeichert.", "success");
+        resetCustomerForm();
+        await loadCustomers();
+        await loadReports();
+
+      } catch (err) {
+        console.error("Fehler beim Speichern:", err);
+        showMessage("customerMessage", "Fehler beim Speichern des Kunden.", "error");
+      }
+    }
+
+    async function deleteCustomer(customerId) {
+      const confirmed = confirm("Kunde wirklich löschen? Zugehörige Berichte werden ebenfalls gelöscht.");
+      if (!confirmed) return;
+
+      try {
+        const res = await fetch(`${API_BASE}/customers/${customerId}`, {
+          method: "DELETE"
+        });
+
+        if (!res.ok) {
+          alert("Fehler beim Löschen des Kunden.");
+          return;
+        }
+
+        await loadCustomers();
+        await loadReports();
+        document.getElementById("reportDetail").innerText = "Noch kein Bericht ausgewählt.";
+        document.getElementById("result").innerText = "Noch kein Bericht erstellt.";
+
+      } catch (err) {
+        console.error("Fehler beim Löschen des Kunden:", err);
+      }
+    }
 
     function renderMaterials() {
       const list = document.getElementById("materialList");
@@ -593,7 +770,7 @@ async function loadCustomers() {
         li.className = "material-item";
         li.innerHTML = `
           <strong>${item.name}</strong>
-          <div class="muted">${item.quantity} ${item.unit} x ${item.unit_price} € = ${(item.quantity * item.unit_price).toFixed(2)} €</div>
+          <div class="muted">${item.quantity} ${item.unit} x ${formatEuro(item.unit_price)} = ${formatEuro(item.quantity * item.unit_price)}</div>
           <button class="danger-btn" style="margin-top:10px;" onclick="removeMaterial(${index})">Entfernen</button>
         `;
         list.appendChild(li);
@@ -604,20 +781,25 @@ async function loadCustomers() {
       clearMessage("reportMessage");
 
       const materialName = document.getElementById("material_name").value.trim();
-      const materialQuantity = document.getElementById("material_quantity").value;
+      const materialQuantity = parseFloat(document.getElementById("material_quantity").value);
       const materialUnit = document.getElementById("material_unit").value.trim();
-      const materialPrice = document.getElementById("material_price").value;
+      const materialPrice = parseFloat(document.getElementById("material_price").value);
 
-      if (!materialName || !materialQuantity || !materialUnit || !materialPrice) {
-        showMessage("reportMessage", "Bitte alle Materialfelder vollständig ausfüllen.", "error");
+      if (!materialName || !materialUnit || !materialQuantity || materialPrice < 0 || Number.isNaN(materialPrice)) {
+        showMessage("reportMessage", "Bitte alle Materialfelder korrekt ausfüllen.", "error");
+        return;
+      }
+
+      if (materialQuantity <= 0) {
+        showMessage("reportMessage", "Materialmenge muss größer 0 sein.", "error");
         return;
       }
 
       materials.push({
         name: materialName,
-        quantity: parseFloat(materialQuantity),
+        quantity: materialQuantity,
         unit: materialUnit,
-        unit_price: parseFloat(materialPrice)
+        unit_price: materialPrice
       });
 
       document.getElementById("material_name").value = "";
@@ -639,23 +821,9 @@ async function loadCustomers() {
       renderMaterials();
     }
 
-    function calculateNetWorkTimes(startTime, endTime, breakMinutes) {
-      const [startHour, startMinute] = startTime.split(":").map(Number);
-      const [endHour, endMinute] = endTime.split(":").map(Number);
-
-      const startTotal = startHour * 60 + startMinute;
-      const endTotal = endHour * 60 + endMinute;
-
-      const grossMinutes = endTotal - startTotal;
-      const netMinutes = grossMinutes - breakMinutes;
-
-      return {
-        grossMinutes,
-        netMinutes
-      };
-    }
-
-    function clearReportForm() {
+    function resetReportForm() {
+      document.getElementById("editingReportId").value = "";
+      document.getElementById("reportFormTitle").textContent = "Arbeitsbericht erstellen";
       document.getElementById("work_date").value = "";
       document.getElementById("start_time").value = "";
       document.getElementById("end_time").value = "";
@@ -664,19 +832,22 @@ async function loadCustomers() {
       document.getElementById("hourly_rate").value = "65";
       document.getElementById("description").value = "";
       document.getElementById("notes").value = "";
+      document.getElementById("result").innerText = "Noch kein Bericht erstellt.";
       clearMaterials();
+      clearMessage("reportMessage");
     }
 
-    async function createReport() {
+    async function saveReport() {
       clearMessage("reportMessage");
-      document.getElementById("result").innerText = "Bericht wird erstellt...";
+      document.getElementById("result").innerText = "Bericht wird gespeichert...";
 
+      const reportId = document.getElementById("editingReportId").value;
       const customerId = document.getElementById("customerSelect").value;
       const customerText = document.getElementById("customerSelect").selectedOptions[0]?.text || "-";
       const workDate = document.getElementById("work_date").value;
       const startTime = document.getElementById("start_time").value;
       const endTime = document.getElementById("end_time").value;
-      const breakMinutes = parseInt(document.getElementById("break_minutes").value || "0", 10);
+      const pauseMinutes = parseInt(document.getElementById("break_minutes").value || "0", 10);
       const hourlyRate = parseFloat(document.getElementById("hourly_rate").value || "0");
       const travelCost = parseFloat(document.getElementById("travel_cost").value || "0");
       const description = document.getElementById("description").value.trim();
@@ -688,13 +859,7 @@ async function loadCustomers() {
         return;
       }
 
-      if (breakMinutes < 0) {
-        showMessage("reportMessage", "Pause darf nicht negativ sein.", "error");
-        document.getElementById("result").innerText = "Noch kein Bericht erstellt.";
-        return;
-      }
-
-      const { grossMinutes, netMinutes } = calculateNetWorkTimes(startTime, endTime, breakMinutes);
+      const grossMinutes = calculateGrossMinutes(startTime, endTime);
 
       if (grossMinutes <= 0) {
         showMessage("reportMessage", "Endzeit muss nach der Startzeit liegen.", "error");
@@ -702,39 +867,35 @@ async function loadCustomers() {
         return;
       }
 
-      if (netMinutes <= 0) {
-        showMessage("reportMessage", "Die Pause ist zu lang. Netto-Arbeitszeit muss größer als 0 sein.", "error");
+      if (pauseMinutes < 0 || pauseMinutes >= grossMinutes) {
+        showMessage("reportMessage", "Pause ist ungültig oder zu lang.", "error");
         document.getElementById("result").innerText = "Noch kein Bericht erstellt.";
         return;
       }
-
-      const adjustedEndTotal = (() => {
-        const [endHour, endMinute] = endTime.split(":").map(Number);
-        return endHour * 60 + endMinute - breakMinutes;
-      })();
-
-      const adjustedEndHour = String(Math.floor(adjustedEndTotal / 60)).padStart(2, "0");
-      const adjustedEndMinute = String(adjustedEndTotal % 60).padStart(2, "0");
-      const adjustedEndTime = `${adjustedEndHour}:${adjustedEndMinute}`;
 
       const payload = {
         customer_id: parseInt(customerId),
         work_date: workDate,
         start_time: startTime,
-        end_time: adjustedEndTime,
-        description: description,
-        notes: notes || `Pause: ${breakMinutes} Minuten`,
+        end_time: endTime,
+        pause_minutes: pauseMinutes,
+        description,
+        notes: notes || null,
         hourly_rate: hourlyRate,
         travel_cost: travelCost,
-        materials: materials
+        materials
       };
 
       try {
-        const res = await fetch(`${API_BASE}/job-reports`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json"
-          },
+        const url = reportId
+          ? `${API_BASE}/job-reports/${reportId}`
+          : `${API_BASE}/job-reports`;
+
+        const method = reportId ? "PUT" : "POST";
+
+        const res = await fetch(url, {
+          method,
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify(payload)
         });
 
@@ -742,28 +903,30 @@ async function loadCustomers() {
 
         if (!res.ok) {
           console.error("Backend-Fehler Bericht:", data);
-          showMessage("reportMessage", "Fehler beim Erstellen des Berichts.", "error");
-          document.getElementById("result").innerText = "Fehler beim Erstellen des Berichts.";
+          showMessage("reportMessage", "Fehler beim Speichern des Berichts.", "error");
+          document.getElementById("result").innerText = JSON.stringify(data, null, 2);
           return;
         }
 
         const materialLines = (data.materials && data.materials.length > 0)
-          ? data.materials.map(item => `- ${item.name}: ${item.quantity} ${item.unit} x ${item.unit_price} € = ${item.total_price} €`).join("\n")
+          ? data.materials.map(item => `- ${item.name}: ${item.quantity} ${item.unit} x ${formatEuro(item.unit_price)} = ${formatEuro(item.total_price)}`).join("\n")
           : "Keine Materialien erfasst.";
 
         document.getElementById("result").innerText =
-`Bericht erfolgreich erstellt
+`Bericht ${reportId ? "aktualisiert" : "erfolgreich erstellt"}
 
 Kunde: ${customerText}
 Arbeitsdatum: ${data.work_date}
+Start: ${data.start_time}
+Ende: ${data.end_time}
 Arbeitszeit brutto: ${grossMinutes} Minuten
-Pause: ${breakMinutes} Minuten
+Pause: ${data.pause_minutes} Minuten
 Arbeitszeit netto: ${data.labor_minutes} Minuten
 
-Arbeitskosten: ${data.labor_cost} €
-Materialkosten: ${data.material_cost} €
-Fahrtkosten: ${data.travel_cost} €
-Gesamtkosten: ${data.total_cost} €
+Arbeitskosten: ${formatEuro(data.labor_cost)}
+Materialkosten: ${formatEuro(data.material_cost)}
+Fahrtkosten: ${formatEuro(data.travel_cost)}
+Gesamtkosten: ${formatEuro(data.total_cost)}
 
 Beschreibung:
 ${data.description}
@@ -774,53 +937,70 @@ ${data.notes || "-"}
 Material:
 ${materialLines}`;
 
-        showMessage("reportMessage", "Bericht erfolgreich erstellt.", "success");
-        clearReportForm();
+        showMessage("reportMessage", reportId ? "Bericht aktualisiert." : "Bericht erstellt.", "success");
+        resetReportForm();
         await loadReports();
 
       } catch (err) {
-        console.error("Fehler beim Erstellen des Berichts:", err);
-        showMessage("reportMessage", "Fehler beim Erstellen des Berichts.", "error");
-        document.getElementById("result").innerText = "Fehler beim Erstellen des Berichts.";
+        console.error("Fehler beim Speichern des Berichts:", err);
+        showMessage("reportMessage", "Fehler beim Speichern des Berichts.", "error");
       }
     }
 
     async function loadReports() {
-  try {
-    const res = await fetch(`${API_BASE}/job-reports`);
-    const data = await res.json();
+      try {
+        const res = await fetch(`${API_BASE}/job-reports`);
+        reports = await res.json();
 
-    const reportList = document.getElementById("reportList");
-    reportList.innerHTML = "";
+        const reportList = document.getElementById("reportList");
+        const dashboardReportList = document.getElementById("dashboardReportList");
 
-    if (!Array.isArray(data) || data.length === 0) {
-      reportList.innerHTML = "<li class='report-item'><strong>Noch keine Berichte vorhanden.</strong></li>";
-      document.getElementById("reportCount").textContent = "0";
-      document.getElementById("lastTotal").textContent = "0 €";
-      return;
+        reportList.innerHTML = "";
+        dashboardReportList.innerHTML = "";
+
+        if (!Array.isArray(reports) || reports.length === 0) {
+          reportList.innerHTML = "<li class='report-item'><strong>Noch keine Berichte vorhanden.</strong></li>";
+          dashboardReportList.innerHTML = "<li class='report-item'><strong>Noch keine Berichte vorhanden.</strong></li>";
+          document.getElementById("reportCount").textContent = "0";
+          document.getElementById("lastTotal").textContent = "0 €";
+          return;
+        }
+
+        reports.forEach(report => {
+          const li = createReportListItem(report);
+          reportList.appendChild(li);
+        });
+
+        reports.slice(0, 5).forEach(report => {
+          const li = createReportListItem(report);
+          dashboardReportList.appendChild(li);
+        });
+
+        document.getElementById("reportCount").textContent = reports.length;
+        document.getElementById("lastTotal").textContent = formatEuro(reports[0].total_cost);
+
+      } catch (err) {
+        console.error("Fehler beim Laden der Berichte:", err);
+      }
     }
 
-    data.forEach(report => {
+    function createReportListItem(report) {
       const li = document.createElement("li");
       li.className = "report-item";
       li.innerHTML = `
         <strong>Bericht #${report.id}</strong>
         <div class="muted">Kunde: ${report.customer_name || "ID " + report.customer_id}</div>
         <div class="muted">Datum: ${report.work_date}</div>
-        <div class="muted">Gesamt: ${report.total_cost} €</div>
-        <button class="danger-btn" style="margin-top:10px;" onclick="event.stopPropagation(); deleteReport(${report.id})">Bericht löschen</button>
+        <div class="muted">Pause: ${report.pause_minutes || 0} Min.</div>
+        <div class="muted">Gesamt: ${formatEuro(report.total_cost)}</div>
+        <div class="actions">
+          <button class="secondary-btn" onclick="event.stopPropagation(); editReport(${report.id})">Bearbeiten</button>
+          <button class="danger-btn" onclick="event.stopPropagation(); deleteReport(${report.id})">Löschen</button>
+        </div>
       `;
       li.onclick = () => loadReportDetail(report.id);
-      reportList.appendChild(li);
-    });
-
-    document.getElementById("reportCount").textContent = data.length;
-    document.getElementById("lastTotal").textContent = formatEuro(data[0].total_cost);
-
-  } catch (err) {
-    console.error("Fehler beim Laden der Berichte:", err);
-  }
-}
+      return li;
+    }
 
     async function loadReportDetail(reportId) {
       try {
@@ -833,7 +1013,7 @@ ${materialLines}`;
         }
 
         const materialLines = (data.materials && data.materials.length > 0)
-          ? data.materials.map(item => `- ${item.name}: ${item.quantity} ${item.unit} x ${item.unit_price} € = ${item.total_price} €`).join("\n")
+          ? data.materials.map(item => `- ${item.name}: ${item.quantity} ${item.unit} x ${formatEuro(item.unit_price)} = ${formatEuro(item.total_price)}`).join("\n")
           : "Keine Materialien erfasst.";
 
         document.getElementById("reportDetail").innerText =
@@ -843,6 +1023,7 @@ Kunde ID: ${data.customer_id}
 Datum: ${data.work_date}
 Start: ${data.start_time}
 Ende: ${data.end_time}
+Pause: ${data.pause_minutes} Minuten
 
 Beschreibung:
 ${data.description}
@@ -851,13 +1032,15 @@ Notizen:
 ${data.notes || "-"}
 
 Arbeitszeit netto: ${data.labor_minutes} Minuten
-Arbeitskosten: ${data.labor_cost} €
-Materialkosten: ${data.material_cost} €
-Fahrtkosten: ${data.travel_cost} €
-Gesamtkosten: ${data.total_cost} €
+Arbeitskosten: ${formatEuro(data.labor_cost)}
+Materialkosten: ${formatEuro(data.material_cost)}
+Fahrtkosten: ${formatEuro(data.travel_cost)}
+Gesamtkosten: ${formatEuro(data.total_cost)}
 
 Material:
 ${materialLines}`;
+
+        showView("reports");
 
       } catch (err) {
         console.error("Fehler beim Laden der Berichtsdetails:", err);
@@ -865,50 +1048,66 @@ ${materialLines}`;
       }
     }
 
-    async function deleteCustomer(customerId) {
-  const confirmed = confirm("Kunde wirklich löschen?");
-  if (!confirmed) return;
+    async function editReport(reportId) {
+      try {
+        const res = await fetch(`${API_BASE}/job-reports/${reportId}`);
+        const data = await res.json();
 
-  try {
-    const res = await fetch(`${API_BASE}/customers/${customerId}`, {
-      method: "DELETE"
-    });
+        if (!res.ok) {
+          alert("Bericht konnte nicht geladen werden.");
+          return;
+        }
 
-    if (!res.ok) {
-      alert("Fehler beim Löschen des Kunden.");
-      return;
+        showView("newReport");
+
+        document.getElementById("editingReportId").value = data.id;
+        document.getElementById("reportFormTitle").textContent = `Bericht bearbeiten #${data.id}`;
+        document.getElementById("customerSelect").value = data.customer_id;
+        document.getElementById("work_date").value = data.work_date;
+        document.getElementById("start_time").value = data.start_time;
+        document.getElementById("end_time").value = data.end_time;
+        document.getElementById("break_minutes").value = data.pause_minutes || 0;
+        document.getElementById("hourly_rate").value = data.hourly_rate;
+        document.getElementById("travel_cost").value = data.travel_cost;
+        document.getElementById("description").value = data.description;
+        document.getElementById("notes").value = data.notes || "";
+
+        materials = (data.materials || []).map(item => ({
+          name: item.name,
+          quantity: item.quantity,
+          unit: item.unit,
+          unit_price: item.unit_price
+        }));
+
+        renderMaterials();
+
+      } catch (err) {
+        console.error("Fehler beim Laden zum Bearbeiten:", err);
+      }
     }
 
-    await loadCustomers();
-    await loadReports();
-    document.getElementById("reportDetail").innerText = "Noch kein Bericht ausgewählt.";
-    document.getElementById("result").innerText = "Noch kein Bericht erstellt.";
-  } catch (err) {
-    console.error("Fehler beim Löschen des Kunden:", err);
-  }
-}
+    async function deleteReport(reportId) {
+      const confirmed = confirm("Bericht wirklich löschen?");
+      if (!confirmed) return;
 
-async function deleteReport(reportId) {
-  const confirmed = confirm("Bericht wirklich löschen?");
-  if (!confirmed) return;
+      try {
+        const res = await fetch(`${API_BASE}/job-reports/${reportId}`, {
+          method: "DELETE"
+        });
 
-  try {
-    const res = await fetch(`${API_BASE}/job-reports/${reportId}`, {
-      method: "DELETE"
-    });
+        if (!res.ok) {
+          alert("Fehler beim Löschen des Berichts.");
+          return;
+        }
 
-    if (!res.ok) {
-      alert("Fehler beim Löschen des Berichts.");
-      return;
+        await loadReports();
+        document.getElementById("reportDetail").innerText = "Bericht gelöscht.";
+        document.getElementById("result").innerText = "Noch kein Bericht erstellt.";
+
+      } catch (err) {
+        console.error("Fehler beim Löschen des Berichts:", err);
+      }
     }
-
-    await loadReports();
-    document.getElementById("reportDetail").innerText = "Bericht gelöscht.";
-    document.getElementById("result").innerText = "Noch kein Bericht erstellt.";
-  } catch (err) {
-    console.error("Fehler beim Löschen des Berichts:", err);
-  }
-}
 
     renderMaterials();
     loadCustomers();
