@@ -1003,50 +1003,125 @@ ${materialLines}`;
     }
 
     async function loadReportDetail(reportId) {
-      try {
-        const res = await fetch(`${API_BASE}/job-reports/${reportId}`);
-        const data = await res.json();
+  try {
+    const res = await fetch(`${API_BASE}/job-reports/${reportId}`);
+    const data = await res.json();
 
-        if (!res.ok) {
-          document.getElementById("reportDetail").innerText = "Berichtsdetails konnten nicht geladen werden.";
-          return;
-        }
-
-        const materialLines = (data.materials && data.materials.length > 0)
-          ? data.materials.map(item => `- ${item.name}: ${item.quantity} ${item.unit} x ${formatEuro(item.unit_price)} = ${formatEuro(item.total_price)}`).join("\n")
-          : "Keine Materialien erfasst.";
-
-        document.getElementById("reportDetail").innerText =
-`Bericht #${data.id}
-
-Kunde ID: ${data.customer_id}
-Datum: ${data.work_date}
-Start: ${data.start_time}
-Ende: ${data.end_time}
-Pause: ${data.pause_minutes} Minuten
-
-Beschreibung:
-${data.description}
-
-Notizen:
-${data.notes || "-"}
-
-Arbeitszeit netto: ${data.labor_minutes} Minuten
-Arbeitskosten: ${formatEuro(data.labor_cost)}
-Materialkosten: ${formatEuro(data.material_cost)}
-Fahrtkosten: ${formatEuro(data.travel_cost)}
-Gesamtkosten: ${formatEuro(data.total_cost)}
-
-Material:
-${materialLines}`;
-
-        showView("reports");
-
-      } catch (err) {
-        console.error("Fehler beim Laden der Berichtsdetails:", err);
-        document.getElementById("reportDetail").innerText = "Fehler beim Laden der Berichtsdetails.";
-      }
+    if (!res.ok) {
+      document.getElementById("reportDetail").innerText = "Berichtsdetails konnten nicht geladen werden.";
+      return;
     }
+
+    const customer = data.customer || {};
+    const materialRows = (data.materials && data.materials.length > 0)
+      ? data.materials.map(item => `
+        <tr>
+          <td>${item.name}</td>
+          <td>${item.quantity}</td>
+          <td>${item.unit}</td>
+          <td>${formatEuro(item.unit_price)}</td>
+          <td>${formatEuro(item.total_price)}</td>
+        </tr>
+      `).join("")
+      : `
+        <tr>
+          <td colspan="5">Keine Materialien erfasst.</td>
+        </tr>
+      `;
+
+    document.getElementById("reportDetail").innerHTML = `
+      <div id="printArea">
+        <div style="display:flex;justify-content:space-between;gap:20px;margin-bottom:24px;">
+          <div>
+            <h2 style="margin:0 0 6px;">Arbeitsbericht #${data.id}</h2>
+            <div class="muted">Datum: ${data.work_date}</div>
+          </div>
+          <div style="text-align:right;">
+            <strong>Handwerk Report</strong><br>
+            <span class="muted">Digitaler Arbeitsbericht</span>
+          </div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px;">
+          <div style="border:1px solid var(--border);border-radius:12px;padding:12px;background:white;">
+            <strong>Kunde</strong><br>
+            ${customer.name || "Unbekannt"}<br>
+            ${customer.street || ""}<br>
+            ${(customer.zip_code || "") + " " + (customer.city || "")}<br>
+            ${customer.phone || ""}<br>
+            ${customer.email || ""}
+          </div>
+
+          <div style="border:1px solid var(--border);border-radius:12px;padding:12px;background:white;">
+            <strong>Einsatzdaten</strong><br>
+            Start: ${data.start_time}<br>
+            Ende: ${data.end_time}<br>
+            Pause: ${data.pause_minutes} Minuten<br>
+            Netto-Arbeitszeit: ${data.labor_minutes} Minuten<br>
+            Stundensatz: ${formatEuro(data.hourly_rate)}
+          </div>
+        </div>
+
+        <div style="margin-bottom:18px;">
+          <h3>Ausgeführte Arbeiten</h3>
+          <p>${data.description}</p>
+        </div>
+
+        <div style="margin-bottom:18px;">
+          <h3>Notizen</h3>
+          <p>${data.notes || "-"}</p>
+        </div>
+
+        <h3>Material</h3>
+        <table style="width:100%;border-collapse:collapse;margin-bottom:20px;">
+          <thead>
+            <tr>
+              <th style="text-align:left;border-bottom:1px solid var(--border);padding:8px;">Material</th>
+              <th style="text-align:left;border-bottom:1px solid var(--border);padding:8px;">Menge</th>
+              <th style="text-align:left;border-bottom:1px solid var(--border);padding:8px;">Einheit</th>
+              <th style="text-align:left;border-bottom:1px solid var(--border);padding:8px;">Einzelpreis</th>
+              <th style="text-align:left;border-bottom:1px solid var(--border);padding:8px;">Gesamt</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${materialRows}
+          </tbody>
+        </table>
+
+        <div style="margin-left:auto;max-width:320px;border:1px solid var(--border);border-radius:12px;padding:14px;background:white;">
+          <div style="display:flex;justify-content:space-between;margin-bottom:8px;">
+            <span>Arbeitskosten</span>
+            <strong>${formatEuro(data.labor_cost)}</strong>
+          </div>
+          <div style="display:flex;justify-content:space-between;margin-bottom:8px;">
+            <span>Materialkosten</span>
+            <strong>${formatEuro(data.material_cost)}</strong>
+          </div>
+          <div style="display:flex;justify-content:space-between;margin-bottom:8px;">
+            <span>Fahrtkosten</span>
+            <strong>${formatEuro(data.travel_cost)}</strong>
+          </div>
+          <hr>
+          <div style="display:flex;justify-content:space-between;font-size:18px;">
+            <span>Gesamtsumme</span>
+            <strong>${formatEuro(data.total_cost)}</strong>
+          </div>
+        </div>
+      </div>
+
+      <div class="actions" style="margin-top:18px;">
+        <button onclick="printReport()">Drucken / als PDF speichern</button>
+        <button class="secondary-btn" onclick="editReport(${data.id})">Bericht bearbeiten</button>
+      </div>
+    `;
+
+    showView("reports");
+
+  } catch (err) {
+    console.error("Fehler beim Laden der Berichtsdetails:", err);
+    document.getElementById("reportDetail").innerText = "Fehler beim Laden der Berichtsdetails.";
+  }
+}
 
     async function editReport(reportId) {
       try {
@@ -1108,6 +1183,61 @@ ${materialLines}`;
         console.error("Fehler beim Löschen des Berichts:", err);
       }
     }
+
+
+    function printReport() {
+  const printContent = document.getElementById("printArea").innerHTML;
+
+  const printWindow = window.open("", "_blank");
+  printWindow.document.write(`
+    <!DOCTYPE html>
+    <html lang="de">
+    <head>
+      <meta charset="UTF-8">
+      <title>Arbeitsbericht</title>
+      <style>
+        body {
+          font-family: Arial, sans-serif;
+          padding: 32px;
+          color: #111827;
+        }
+
+        h2, h3 {
+          margin-bottom: 8px;
+        }
+
+        .muted {
+          color: #6b7280;
+        }
+
+        table {
+          width: 100%;
+          border-collapse: collapse;
+        }
+
+        th, td {
+          padding: 8px;
+          border-bottom: 1px solid #e5e7eb;
+        }
+
+        @media print {
+          button {
+            display: none;
+          }
+        }
+      </style>
+    </head>
+    <body>
+      ${printContent}
+      <script>
+        window.print();
+      <\/script>
+    </body>
+    </html>
+  `);
+
+  printWindow.document.close();
+}
 
     renderMaterials();
     loadCustomers();
